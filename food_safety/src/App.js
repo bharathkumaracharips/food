@@ -1,7 +1,8 @@
+import React from 'react';
 import './App.css';
-import HomeForAdmin from "./admin/home";
+import HomeForAdmin from "./admin/home.js"; // Add .js extension
 import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
-import Register from "./admin/admin_componets/register_hostel";
+import Register from "./admin/admin_componets/register_hostel.js"; // Ensure this matches your folder name
 
 function MainPage() {
   const navigate = useNavigate();
