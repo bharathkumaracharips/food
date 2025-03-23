@@ -9,7 +9,6 @@ dotenv.config();
 
 const app = express();
 const port = 5001;
-
 const mongoURL = process.env.MONGODB_URI;
 
 // Define the Hostel Schema
@@ -25,7 +24,23 @@ const hostelSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Define the Student Schema
+const studentSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    roomNo: { type: String, required: true },
+    username: { type: String, required: true },
+    password: { type: String, required: true },
+    hostelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hostel', required: true },
+    breakfast: { type: Boolean, default: false },
+    lunch: { type: Boolean, default: false },
+    dinner: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
 const Hostel = mongoose.model('Hostel', hostelSchema);
+const Student = mongoose.model('Student', studentSchema);
 
 app.use(cors());
 app.use(express.json());
@@ -125,6 +140,142 @@ app.get("/hostels/:name", checkDBConnection, async (req, res) => {
         }
     } catch (error) {
         console.error("Error fetching hostel:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Login Route
+app.post("/login", checkDBConnection, async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find hostel by username
+        const hostel = await Hostel.findOne({ username });
+        if (!hostel) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        // Compare password
+        const isValidPassword = await bcrypt.compare(password, hostel.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        // Create a response object without sensitive information
+        const hostelData = {
+            id: hostel._id,
+            name: hostel.name,
+            ownerName: hostel.ownerName,
+            email: hostel.email
+        };
+
+        res.json({ 
+            message: "Login successful",
+            hostel: hostelData
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Student Registration Route
+app.post("/api/students/register", checkDBConnection, async (req, res) => {
+    try {
+        const { name, email, phone, roomNo, username, password, hostelId } = req.body;
+
+        // Check if student with same email or username exists
+        const existingStudent = await Student.findOne({ 
+            $or: [
+                { email },
+                { username },
+                { roomNo, hostelId } // Check if room is already occupied in this hostel
+            ]
+        });
+
+        if (existingStudent) {
+            if (existingStudent.email === email) {
+                return res.status(400).json({ error: "Email already registered" });
+            }
+            if (existingStudent.username === username) {
+                return res.status(400).json({ error: "Username already taken" });
+            }
+            if (existingStudent.roomNo === roomNo) {
+                return res.status(400).json({ error: "Room already occupied" });
+            }
+        }
+
+        // Hash password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Create new student
+        const student = new Student({
+            name,
+            email,
+            phone,
+            roomNo,
+            username,
+            password: hashedPassword,
+            hostelId
+        });
+
+        const result = await student.save();
+        
+        res.status(201).json({
+            message: "Student registered successfully",
+            studentId: result._id
+        });
+    } catch (error) {
+        console.error("Student registration error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Get Students by Hostel ID
+app.get("/api/students/:hostelId", checkDBConnection, async (req, res) => {
+    try {
+        const students = await Student.find({ hostelId: req.params.hostelId })
+            .select('-password') // Exclude password from response
+            .sort({ createdAt: -1 }); // Sort by newest first
+        res.json(students);
+    } catch (error) {
+        console.error("Error fetching students:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Remove Student
+app.delete("/api/students/:studentId", checkDBConnection, async (req, res) => {
+    try {
+        const result = await Student.findByIdAndDelete(req.params.studentId);
+        if (!result) {
+            return res.status(404).json({ error: "Student not found" });
+        }
+        res.json({ message: "Student removed successfully" });
+    } catch (error) {
+        console.error("Error removing student:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Update Student Food Status
+app.patch("/students/:studentId/food", checkDBConnection, async (req, res) => {
+    try {
+        const { breakfast, lunch, dinner } = req.body;
+        const result = await Student.findByIdAndUpdate(
+            req.params.studentId,
+            { breakfast, lunch, dinner },
+            { new: true }
+        );
+        
+        if (!result) {
+            return res.status(404).json({ error: "Student not found" });
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error("Error updating food status:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
