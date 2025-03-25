@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Table, message, Modal } from 'antd';
 import RegisterStudent from './owner_components/register_student';
+import StudentFoodTable from './owner_components/tabel_for_food'; // Import the food table component
 import './home.css';
 
 const OwnerHome = () => {
@@ -135,11 +136,16 @@ const OwnerHome = () => {
                 <Card title="Registered Students" className="students-card">
                     <Table 
                         dataSource={students} 
-                        columns={columns} 
+                        columns={columns}  
                         loading={loading}
                         rowKey="_id"
                         pagination={{ pageSize: 10 }}
                     />
+                </Card>
+
+                {/* Add the StudentFoodTable component */}
+                <Card title="Student Food Table" className="food-table-card">
+                    <StudentFoodTable />
                 </Card>
             </div>
 
@@ -150,7 +156,7 @@ const OwnerHome = () => {
                 footer={null}
                 width={600}
             >
-                <RegisterStudent 
+                <RegisterStudent
                     hostelId={hostelData.id}
                     onSuccess={() => {
                         setIsModalVisible(false);
