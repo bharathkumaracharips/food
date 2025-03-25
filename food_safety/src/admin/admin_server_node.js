@@ -280,6 +280,17 @@ app.patch("/students/:studentId/food", checkDBConnection, async (req, res) => {
     }
 });
 
+// Get Hostel Names for Student Login
+app.get("/api/hostels", checkDBConnection, async (req, res) => {
+    try {
+        const hostels = await Hostel.find({}, { name: 1, _id: 1 });
+        res.json(hostels);
+    } catch (error) {
+        console.error("Error fetching hostels:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 // 404 Route
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
