@@ -24,13 +24,11 @@ export default function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
         if (hostel.password !== hostel.confirmPassword) {
-            setError("Passwords do not match");
-            return;
+          throw new Error("Passwords do not match");
         }   
         try {
-            const response = await fetch("http://localhost:5001/register", {
+            const response = await fetch("http://localhost:5001/hostel/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -6,9 +6,10 @@ const RegisterStudent = ({ hostelId, onSuccess }) => {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (values) => {
+        console.log(values);
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/students/register', {
+            const response = await fetch('http://localhost:5001/student/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -18,6 +18,7 @@ const StudentLogin = () => {
           throw new Error("Failed to fetch hostels");
         }
         const data = await response.json();
+        console.log(data);
         setHostels(data);
       } catch (error) {
         console.error("Error fetching hostels:", error);

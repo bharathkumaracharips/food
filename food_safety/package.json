@@ -15,18 +15,20 @@
     "express": "^4.21.2",
     "mongodb": "^6.15.0",
     "mongoose": "^8.12.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "nodemon": "^3.1.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.0",
     "react-scripts": "^3.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "node src/admin/admin_server_node.js"
+    "server": "node src/Server/app.js",
+    "tests": "nodemon src/Server/app.js"
   },
   "eslintConfig": {
     "extends": [
