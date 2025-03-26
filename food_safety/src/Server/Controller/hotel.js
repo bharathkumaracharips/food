@@ -98,3 +98,13 @@ export const getAllStudents = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const getAllHostels = async (req, res) => {
+  try {
+    const hostels = await Hostel.find({}, { password: 0 }); // Exclude password field
+    res.json(hostels);
+  } catch (error) {
+    console.error("Error fetching hostels:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

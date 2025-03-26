@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Table, message, Modal } from 'antd';
+import { Button, Card, Table, message, Modal, Input, Form, Tabs } from 'antd';
 import RegisterStudent from './owner_components/register_student';
-import StudentFoodTable from './owner_components/tabel_for_food'; // Import the food table component
+import StudentFoodTable from './owner_components/tabel_for_food';
+import MealMonitoring from './owner_components/meal_monitoring';
 import './home.css';
 
 const OwnerHome = () => {
@@ -11,6 +12,9 @@ const OwnerHome = () => {
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [form] = Form.useForm();
 
     useEffect(() => {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -24,7 +28,7 @@ const OwnerHome = () => {
     const fetchStudents = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/students/${hostelData.id}`);
+            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelData.id}`);
             const data = await response.json();
             if (response.ok) {
                 setStudents(data);
@@ -41,13 +45,13 @@ const OwnerHome = () => {
 
     const handleRemoveStudent = async (studentId) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/students/${studentId}`, {
+            const response = await fetch(`http://localhost:5001/student/${studentId}`, {
                 method: 'DELETE',
             });
 
             if (response.ok) {
                 message.success('Student removed successfully');
-                fetchStudents(); // Refresh the list
+                fetchStudents();
             } else {
                 message.error('Failed to remove student');
             }
@@ -61,6 +65,33 @@ const OwnerHome = () => {
         localStorage.removeItem('hostelData');
         localStorage.removeItem('isLoggedIn');
         navigate('/');
+    };
+
+    const handleResetPassword = async (values) => {
+        try {
+            const response = await fetch('http://localhost:5001/student/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    studentId: selectedStudent._id,
+                    newPassword: values.newPassword
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to reset password');
+            }
+
+            message.success('Password reset successfully');
+            setIsResetModalVisible(false);
+            form.resetFields();
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            message.error(error.message || 'Failed to reset password');
+        }
     };
 
     const columns = [
@@ -93,14 +124,58 @@ const OwnerHome = () => {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
-                <Button 
-                    type="link" 
-                    danger 
-                    onClick={() => handleRemoveStudent(record._id)}
-                >
-                    Remove
-                </Button>
+                <div>
+                    <Button 
+                        type="link" 
+                        onClick={() => {
+                            setSelectedStudent(record);
+                            setIsResetModalVisible(true);
+                        }}
+                        style={{ marginRight: '8px' }}
+                    >
+                        Reset Password
+                    </Button>
+                    <Button 
+                        type="link" 
+                        danger 
+                        onClick={() => handleRemoveStudent(record._id)}
+                    >
+                        Remove
+                    </Button>
+                </div>
             ),
+        },
+    ];
+
+    const tabItems = [
+        {
+            key: '1',
+            label: 'Students',
+            children: (
+                <Card title="Registered Students" className="students-card">
+                    <Table 
+                        dataSource={students} 
+                        columns={columns}  
+                        loading={loading}
+                        rowKey="_id"
+                        pagination={{ pageSize: 10 }}
+                    />
+                </Card>
+            ),
+        },
+        {
+            key: '2',
+            label: "Today's Meals",
+            children: (
+                <Card title="Student Food Table" className="food-table-card">
+                    <StudentFoodTable />
+                </Card>
+            ),
+        },
+        {
+            key: '3',
+            label: 'Meal History',
+            children: <MealMonitoring hostelId={hostelData.id} />,
         },
     ];
 
@@ -133,20 +208,7 @@ const OwnerHome = () => {
                     </div>
                 </Card>
 
-                <Card title="Registered Students" className="students-card">
-                    <Table 
-                        dataSource={students} 
-                        columns={columns}  
-                        loading={loading}
-                        rowKey="_id"
-                        pagination={{ pageSize: 10 }}
-                    />
-                </Card>
-
-                {/* Add the StudentFoodTable component */}
-                <Card title="Student Food Table" className="food-table-card">
-                    <StudentFoodTable />
-                </Card>
+                <Tabs defaultActiveKey="1" items={tabItems} />
             </div>
 
             <Modal
@@ -154,15 +216,38 @@ const OwnerHome = () => {
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 footer={null}
-                width={600}
             >
-                <RegisterStudent
-                    hostelId={hostelData.id}
+                <RegisterStudent 
+                    hostelId={hostelData.id} 
                     onSuccess={() => {
                         setIsModalVisible(false);
                         fetchStudents();
                     }}
                 />
+            </Modal>
+
+            <Modal
+                title="Reset Password"
+                open={isResetModalVisible}
+                onCancel={() => setIsResetModalVisible(false)}
+                footer={null}
+            >
+                <Form form={form} onFinish={handleResetPassword}>
+                    <Form.Item
+                        name="newPassword"
+                        rules={[
+                            { required: true, message: 'Please enter new password' },
+                            { min: 6, message: 'Password must be at least 6 characters' }
+                        ]}
+                    >
+                        <Input.Password placeholder="Enter new password" />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" block>
+                            Reset Password
+                        </Button>
+                    </Form.Item>
+                </Form>
             </Modal>
         </div>
     );

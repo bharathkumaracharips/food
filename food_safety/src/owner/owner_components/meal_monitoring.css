@@ -1,0 +1,118 @@
+.meal-monitoring {
+    padding: 24px;
+}
+
+.monitoring-card,
+.stats-card,
+.details-card,
+.calendar-card {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.meal-history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+.meal-history-list .meal-item {
+    margin: 2px 0;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.meal-history-list .opted-in {
+    background-color: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+}
+
+.meal-history-list .opted-out {
+    background-color: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffa39e;
+}
+
+.stats-card .ant-statistic {
+    text-align: center;
+}
+
+.stats-card .ant-statistic-title {
+    font-size: 14px;
+    color: #666;
+}
+
+.stats-card .ant-statistic-content {
+    font-size: 24px;
+    color: #1890ff;
+}
+
+.stats-card .ant-statistic.ant-statistic-loading .ant-statistic-content {
+    opacity: 0.5;
+}
+
+.meal-calendar {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.meal-calendar.ant-spin-nested-loading {
+    min-height: 400px;
+}
+
+.details-card .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 500;
+}
+
+.details-card .ant-table-tbody > tr:hover > td {
+    background: #f5f5f5;
+}
+
+/* Loading states */
+.ant-select.ant-select-loading .ant-select-selector {
+    opacity: 0.5;
+}
+
+.ant-picker.ant-picker-loading {
+    opacity: 0.5;
+}
+
+/* Calendar cell hover effect */
+.ant-picker-calendar-date:hover .meal-history-list .meal-item {
+    transform: scale(1.05);
+}
+
+/* Empty state */
+.ant-picker-calendar-date-content:empty::after {
+    content: "No meals";
+    display: block;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    padding: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .meal-monitoring {
+        padding: 16px;
+    }
+
+    .ant-row {
+        margin-bottom: 16px;
+    }
+
+    .stats-card .ant-statistic-title {
+        font-size: 12px;
+    }
+
+    .stats-card .ant-statistic-content {
+        font-size: 20px;
+    }
+} 

@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const mealHistorySchema = new mongoose.Schema({
+    date: { type: Date, required: true },
+    breakfast: { type: Boolean, default: false },
+    lunch: { type: Boolean, default: false },
+    dinner: { type: Boolean, default: false }
+});
+
 const studentSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -8,15 +15,17 @@ const studentSchema = new mongoose.Schema({
     username: { type: String, required: true },
     password: { type: String, required: true },
     hostelId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Hostel",
-      required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hostel",
+        required: true,
     },
     breakfast: { type: Boolean, default: false },
     lunch: { type: Boolean, default: false },
     dinner: { type: Boolean, default: false },
+    mealHistory: [mealHistorySchema],
     createdAt: { type: Date, default: Date.now },
-  });
+});
+
 const Student = mongoose.model("Student", studentSchema);
 
 export default Student;

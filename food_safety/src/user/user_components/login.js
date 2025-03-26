@@ -7,18 +7,17 @@ const { Option } = Select;
 
 const StudentLogin = () => {
   const [hostels, setHostels] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/hostels");
+        const response = await fetch("http://localhost:5001/hostel/all");
         if (!response.ok) {
           throw new Error("Failed to fetch hostels");
         }
         const data = await response.json();
-        console.log(data);
         setHostels(data);
       } catch (error) {
         console.error("Error fetching hostels:", error);
@@ -33,7 +32,9 @@ const StudentLogin = () => {
 
   const handleLogin = async (values) => {
     try {
-      const response = await fetch("http://localhost:5001/api/students/login", {
+      setLoading(true);
+      console.log('Login values being sent:', values);
+      const response = await fetch("http://localhost:5001/student/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,16 +43,22 @@ const StudentLogin = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
-        message.success("Login successful");
-        localStorage.setItem("studentData", JSON.stringify(data));
-        navigate("/user/home");
-      } else {
-        message.error(data.message || "Login failed");
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
       }
+
+      // Store student data in localStorage
+      localStorage.setItem("studentData", JSON.stringify(data));
+      message.success("Login successful");
+      
+      // Navigate to dashboard
+      navigate("/user/home");
     } catch (error) {
       console.error("Error during login:", error);
-      message.error("Login failed");
+      message.error(error.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,7 +113,7 @@ const StudentLogin = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" htmlType="submit" loading={loading} block>
               Login
             </Button>
           </Form.Item>

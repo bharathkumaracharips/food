@@ -6,7 +6,7 @@ import Register from "./admin/admin_componets/register_hostel.js"; // Ensure thi
 import OwnerLogin from "./owner/owner_components/login.js";
 import OwnerHome from "./owner/home.js";
 import StudentLogin from "./user/user_components/login.js"; // Import StudentLogin
-import StudentHome from "./user/home.js"; // Import StudentHome
+import StudentDashboard from "./user/user_components/dashboard.js";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -38,8 +38,8 @@ function App() {
           <Route path="/admin/hostel" element={<Register />} />
           <Route path="/owner/login" element={<OwnerLogin />} />
           <Route path="/owner/home" element={<OwnerHome />} />
-          <Route path="/user/login" element={<StudentLogin />} /> {/* Add StudentLogin route */}
-          <Route path="/user/home" element={<StudentHome />} /> {/* Add StudentHome route */}
+          <Route path="/user/login" element={<StudentLogin />} />
+          <Route path="/user/home" element={<StudentDashboard />} />
         </Routes>
       </Router>
     </div>
