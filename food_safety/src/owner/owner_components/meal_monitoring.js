@@ -22,14 +22,18 @@ const MealMonitoring = ({ hostelId }) => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelId}`);
+                console.log('Fetching students for hostel:', hostelId); // Debug log
+                const response = await fetch(`http://localhost:5001/api/hostel/get-all-students/${hostelId}`);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Received students data:', data); // Debug log
                     setStudents(data);
                     if (data.length > 0) {
                         setSelectedStudent(data[0]._id); // Auto-select first student
                     }
                 } else {
+                    const errorText = await response.text();
+                    console.error('Server response:', errorText); // Debug log
                     throw new Error('Failed to fetch students');
                 }
             } catch (error) {
@@ -50,9 +54,11 @@ const MealMonitoring = ({ hostelId }) => {
 
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:5001/student/meal-history/${selectedStudent}`);
+                console.log('Fetching meal history for student:', selectedStudent); // Debug log
+                const response = await fetch(`http://localhost:5001/api/student/meal-history/${selectedStudent}`);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Received meal history:', data); // Debug log
                     // Convert dates to moment objects and ensure meals array exists
                     const formattedData = data.map(day => ({
                         ...day,
@@ -62,6 +68,8 @@ const MealMonitoring = ({ hostelId }) => {
                     setMealHistory(formattedData);
                     calculateMonthlyStats(formattedData, selectedMonth);
                 } else {
+                    const errorText = await response.text();
+                    console.error('Server response:', errorText); // Debug log
                     throw new Error('Failed to fetch meal history');
                 }
             } catch (error) {

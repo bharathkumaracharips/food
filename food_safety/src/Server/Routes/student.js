@@ -7,7 +7,9 @@ import {
     submitMeals,
     resetPassword,
     deleteStudent,
-    getMealStatus
+    getMealStatus,
+    getMealPreferences,
+    updateMealPreferences
 } from "../Controller/student.js";
 
 const router = express.Router();
@@ -20,5 +22,7 @@ router.post("/submit-meals/:id", submitMeals);
 router.post("/reset-password", resetPassword);
 router.delete("/:id", deleteStudent);
 router.get("/meal-status/:id", getMealStatus);
+router.get("/:id/meal-preferences", getMealPreferences);
+router.put("/:id/meal-preferences", updateMealPreferences);
 
 export default router; 

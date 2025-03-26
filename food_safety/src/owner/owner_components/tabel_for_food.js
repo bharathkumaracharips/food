@@ -21,11 +21,15 @@ const StudentFoodTable = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelData.id}`);
+            console.log('Fetching students for hostel:', hostelData.id); // Debug log
+            const response = await fetch(`http://localhost:5001/api/hostel/get-all-students/${hostelData.id}`);
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server response:', errorText); // Debug log
                 throw new Error('Failed to fetch students');
             }
             const studentsData = await response.json();
+            console.log('Received students data:', studentsData); // Debug log
 
             // Process the data to include today's meal status
             const today = new Date().toLocaleDateString('en-CA');

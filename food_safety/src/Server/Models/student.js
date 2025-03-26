@@ -1,12 +1,33 @@
 import mongoose from "mongoose";
 
+const mealSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ['Breakfast', 'Lunch', 'Dinner'],
+        required: true
+    },
+    status: {
+        type: Boolean,
+        default: true
+    }
+});
+
 const mealHistorySchema = new mongoose.Schema({
-    date: { type: Date, required: true },
-    meals: [{
-        type: { type: String, enum: ['Breakfast', 'Lunch', 'Dinner'], required: true },
-        status: { type: Boolean, default: false }
-    }],
-    isSubmitted: { type: Boolean, default: false }
+    date: {
+        type: Date,
+        required: true
+    },
+    meals: [mealSchema],
+    isSubmitted: {
+        type: Boolean,
+        default: false
+    }
+});
+
+const mealPreferencesSchema = new mongoose.Schema({
+    breakfast: { type: Boolean, default: true },
+    lunch: { type: Boolean, default: true },
+    dinner: { type: Boolean, default: true }
 });
 
 const studentSchema = new mongoose.Schema({
@@ -25,6 +46,7 @@ const studentSchema = new mongoose.Schema({
     lunch: { type: Boolean, default: false },
     dinner: { type: Boolean, default: false },
     mealHistory: [mealHistorySchema],
+    mealPreferences: { type: mealPreferencesSchema, default: () => ({}) },
     createdAt: { type: Date, default: Date.now },
 });
 

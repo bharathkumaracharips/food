@@ -52,8 +52,8 @@ const SearchHostel = () => {
     };
 
     return (
-        <div className="search-hostel">
-            <div className="search-container">
+        <div className="search-content">
+            <div className="search-input-container">
                 <input
                     type="text"
                     value={hostelName}
@@ -65,6 +65,7 @@ const SearchHostel = () => {
                 <button 
                     onClick={handleSearch} 
                     disabled={loading}
+                    className="search-button"
                 >
                     {loading ? 'Searching...' : 'Search'}
                 </button>
@@ -78,12 +79,30 @@ const SearchHostel = () => {
 
             {hostel && (
                 <div className="hostel-details">
-                    <h2>{hostel.name}</h2>
-                    <p><strong>Owner:</strong> {hostel.ownerName}</p>
-                    <p><strong>Address:</strong> {hostel.address}</p>
-                    <p><strong>Contact:</strong> {hostel.contact}</p>
-                    <p><strong>Email:</strong> {hostel.email}</p>
-                    <p><strong>Website:</strong> {hostel.website}</p>
+                    <div className="detail-row">
+                        <span className="detail-label">Name:</span>
+                        <span className="detail-value">{hostel.name}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Owner:</span>
+                        <span className="detail-value">{hostel.ownerName}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Address:</span>
+                        <span className="detail-value">{hostel.address}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Contact:</span>
+                        <span className="detail-value">{hostel.contact}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Email:</span>
+                        <span className="detail-value">{hostel.email}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Website:</span>
+                        <span className="detail-value">{hostel.website}</span>
+                    </div>
                 </div>
             )}
         </div>

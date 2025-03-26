@@ -4,67 +4,114 @@
     padding: 1rem;
 }
 
-.search-container {
+.search-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.search-input-container {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    width: 100%;
 }
 
-.search-container input {
+.search-input-container input {
     flex: 1;
-    padding: 0.5rem;
+    padding: 12px 16px;
     font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: white;
+    transition: all 0.3s ease;
 }
 
-.search-container button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background-color: #007bff;
+.search-input-container input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.search-input-container input:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.search-button {
+    min-width: 120px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.search-container button:hover {
-    background-color: #0056b3;
+.search-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.search-container button:disabled {
-    background-color: #ccc;
+.search-button:disabled {
+    background: #ccc;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .error-message {
     color: #dc3545;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
 }
 
 .hostel-details {
-    background-color: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    animation: fadeIn 0.3s ease-out;
 }
 
-.hostel-details h2 {
-    color: #333;
-    margin-bottom: 1rem;
+.detail-row {
+    display: flex;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
 }
 
-.hostel-details p {
-    margin: 0.5rem 0;
-    color: #666;
+.detail-row:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: translateX(5px);
 }
 
-.hostel-details strong {
-    color: #333;
-    margin-right: 0.5rem;
+.detail-label {
+    min-width: 100px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.detail-value {
+    flex: 1;
+    color: #4a5568;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 } 

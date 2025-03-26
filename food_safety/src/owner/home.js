@@ -4,6 +4,7 @@ import { Button, Card, Table, message, Modal, Input, Form, Tabs } from 'antd';
 import RegisterStudent from './owner_components/register_student';
 import StudentFoodTable from './owner_components/tabel_for_food';
 import MealMonitoring from './owner_components/meal_monitoring';
+import WeeklyMenu from './owner_components/weekly_menu';
 import './home.css';
 
 const OwnerHome = () => {
@@ -23,7 +24,7 @@ const OwnerHome = () => {
         }
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelId}`);
+            const response = await fetch(`http://localhost:5001/api/hostel/get-all-students/${hostelId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch students');
             }
@@ -64,7 +65,7 @@ const OwnerHome = () => {
 
     const handleRemoveStudent = async (studentId) => {
         try {
-            const response = await fetch(`http://localhost:5001/student/${studentId}`, {
+            const response = await fetch(`http://localhost:5001/api/student/${studentId}`, {
                 method: 'DELETE',
             });
 
@@ -89,7 +90,7 @@ const OwnerHome = () => {
 
     const handleResetPassword = async (values) => {
         try {
-            const response = await fetch('http://localhost:5001/student/reset-password', {
+            const response = await fetch('http://localhost:5001/api/student/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -196,6 +197,11 @@ const OwnerHome = () => {
             key: '3',
             label: 'Meal History',
             children: <MealMonitoring hostelId={hostelData?.id} />,
+        },
+        {
+            key: '4',
+            label: 'Weekly Menu',
+            children: <WeeklyMenu />,
         },
     ];
 

@@ -1,87 +1,181 @@
 .home {
     min-height: 100vh;
     padding: 2rem;
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, rgba(200, 230, 201, 0.8), rgba(76, 175, 80, 0.6));
     display: flex;
     flex-direction: column;
     align-items: center;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .home h1 {
     color: #2c3e50;
     font-size: 2.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     text-align: center;
     font-weight: 600;
-    border-bottom: 3px solid #007bff;
+    position: relative;
     padding-bottom: 0.5rem;
 }
 
-.register-hostel, .search-hostel {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.home h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #007bff, transparent);
+    animation: shimmer 2s infinite;
+}
+
+.home-container {
+    display: flex;
+    gap: 2rem;
     width: 100%;
-    max-width: 800px;
-    margin: 1rem auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.register-hostel, .search-hostel {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    transition: all 0.4s ease;
+    animation: slideUp 0.6s ease-out;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.search-hostel h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    border-bottom: 3px solid #0056b3;
+.register-hostel:hover, .search-hostel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.register-hostel h2, .search-hostel h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 0;
+    text-align: center;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.register-hostel h2::after, .search-hostel h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #28a745, transparent);
+    animation: shimmer 2s infinite;
+}
+
+.search-hostel h2::after {
+    background: linear-gradient(90deg, transparent, #007bff, transparent);
+}
+
+.register-hostel button, .search-hostel button {
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+    margin-top: 1rem;
+    position: relative;
+    overflow: hidden;
+    height: 52px;
+    width: 100%;
+    max-width: 300px;
+    letter-spacing: 0.5px;
 }
 
 .register-hostel button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    align-self: center;
-    margin-top: 1rem;
+    background: linear-gradient(135deg, #28a745, #218838);
 }
 
 .search-hostel button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    align-self: center;
-    margin-top: 1rem;
+    background: linear-gradient(135deg, #007bff, #0056b3);
 }
 
-.register-hostel button:hover {
-    background-color: #218838;
+.register-hostel button::before, .search-hostel button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.register-hostel button:hover::before, .search-hostel button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.register-hostel button:hover, .search-hostel button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.search-hostel button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.register-hostel button:active,
-.search-hostel button:active {
+.register-hostel button:active, .search-hostel button:active {
     transform: translateY(0);
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
 /* Responsive design */
+@media (max-width: 1024px) {
+    .home-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .register-hostel, .search-hostel {
+        max-width: 600px;
+        margin: 0 auto;
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
     .home {
         padding: 1rem;
@@ -89,14 +183,22 @@
 
     .home h1 {
         font-size: 2rem;
+        margin-bottom: 2rem;
     }
 
-    .register-hostel,
-    .search-hostel {
+    .register-hostel, .search-hostel {
         padding: 1.5rem;
+        border-radius: 12px;
     }
 
-    .search-hostel h1 {
-        font-size: 1.75rem;
+    .register-hostel h2, .search-hostel h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .register-hostel button, .search-hostel button {
+        padding: 12px 24px;
+        font-size: 1rem;
+        height: 48px;
     }
 }

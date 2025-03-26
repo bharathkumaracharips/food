@@ -13,7 +13,7 @@ const StudentLogin = () => {
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await fetch("http://localhost:5001/hostel/all");
+        const response = await fetch("http://localhost:5001/api/hostel/all");
         if (!response.ok) {
           throw new Error("Failed to fetch hostels");
         }
@@ -34,7 +34,7 @@ const StudentLogin = () => {
     try {
       setLoading(true);
       console.log('Login values being sent:', values);
-      const response = await fetch("http://localhost:5001/student/login", {
+      const response = await fetch("http://localhost:5001/api/student/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

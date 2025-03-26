@@ -1,6 +1,7 @@
-import React from  "react";
+import React from "react";
 import { useState } from "react";   
 import { useNavigate } from "react-router-dom";
+import './register_hostel.css';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -25,7 +26,8 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (hostel.password !== hostel.confirmPassword) {
-          throw new Error("Passwords do not match");
+            setError("Passwords do not match");
+            return;
         }   
         try {
             const response = await fetch("http://localhost:5001/hostel/register", {
@@ -50,22 +52,101 @@ export default function Register() {
     };
 
     return(
-        <div className="register-hostel">
-            <h1>Register Hostel</h1>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Hostel Name" name="name" value={hostel.name} onChange={handleChange} required />
-                <input type="text" placeholder="Hostel Owner Name" name="ownerName" value={hostel.ownerName} onChange={handleChange} required />
-                <input type="text" placeholder="Hostel Address" name="address" value={hostel.address} onChange={handleChange} required />
-                <input type="text" placeholder="Hostel Contact" name="contact" value={hostel.contact} onChange={handleChange} required />
-                <input type="email" placeholder="Hostel Email" name="email" value={hostel.email} onChange={handleChange} required />
-                <input type="url" placeholder="Hostel Website" name="website" value={hostel.website} onChange={handleChange} required />
-                <input type="text" placeholder="Hostel Owner Username" name="username" value={hostel.username} onChange={handleChange} required />
-                <input type="password" placeholder="Hostel Owner Password" name="password" value={hostel.password} onChange={handleChange} required />
-                <input type="password" placeholder="Hostel Owner Confirm Password" name="confirmPassword" value={hostel.confirmPassword} onChange={handleChange} required />
-                <button type="submit">Register</button>
+        <div className="register-content">
+            {error && <div className="error-message">{error}</div>}
+            <form onSubmit={handleSubmit} className="register-form">
+                <div className="form-group">
+                    <input 
+                        type="text" 
+                        placeholder="Hostel Name" 
+                        name="name" 
+                        value={hostel.name} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="text" 
+                        placeholder="Hostel Owner Name" 
+                        name="ownerName" 
+                        value={hostel.ownerName} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="text" 
+                        placeholder="Hostel Address" 
+                        name="address" 
+                        value={hostel.address} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="text" 
+                        placeholder="Hostel Contact" 
+                        name="contact" 
+                        value={hostel.contact} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="email" 
+                        placeholder="Hostel Email" 
+                        name="email" 
+                        value={hostel.email} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="url" 
+                        placeholder="Hostel Website" 
+                        name="website" 
+                        value={hostel.website} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="text" 
+                        placeholder="Hostel Owner Username" 
+                        name="username" 
+                        value={hostel.username} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="password" 
+                        placeholder="Hostel Owner Password" 
+                        name="password" 
+                        value={hostel.password} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <div className="form-group">
+                    <input 
+                        type="password" 
+                        placeholder="Confirm Password" 
+                        name="confirmPassword" 
+                        value={hostel.confirmPassword} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                </div>
+                <button type="submit" className="register-button">Register</button>
             </form>
         </div>
-               
     );
 }

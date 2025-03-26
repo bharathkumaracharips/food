@@ -311,11 +311,18 @@ export const submitMeals = async (req, res) => {
             return res.status(400).json({ error: "Cannot submit meal preferences for past dates" });
         }
 
-        // Find or create history entry for the target date
-        let dayHistory = student.mealHistory.find(h => {
+        // Check if preferences are already submitted for today
+        const existingHistory = student.mealHistory.find(h => {
             const historyDate = new Date(h.date);
             return historyDate.toISOString().split('T')[0] === targetDate.toISOString().split('T')[0];
         });
+
+        if (existingHistory && existingHistory.isSubmitted) {
+            return res.status(400).json({ error: "Meal preferences already submitted for today" });
+        }
+
+        // Find or create history entry for the target date
+        let dayHistory = existingHistory;
 
         if (!dayHistory) {
             dayHistory = {
@@ -358,4 +365,106 @@ export const submitMeals = async (req, res) => {
         console.error("Error submitting meal preferences:", error);
         res.status(500).json({ error: "Internal server error" });
     }
+};
+
+export const getMealPreferences = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Getting meal preferences for student:', id); // Debug log
+
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Get today's meal preferences from meal history
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let todayHistory = student.mealHistory.find(h => {
+      const historyDate = new Date(h.date);
+      historyDate.setHours(0, 0, 0, 0);
+      return historyDate.getTime() === today.getTime();
+    });
+
+    // If no history exists for today, create default preferences
+    const preferences = {
+      breakfast: todayHistory?.meals?.find(m => m.type === 'Breakfast')?.status ?? true,
+      lunch: todayHistory?.meals?.find(m => m.type === 'Lunch')?.status ?? true,
+      dinner: todayHistory?.meals?.find(m => m.type === 'Dinner')?.status ?? true
+    };
+
+    console.log('Returning meal preferences:', preferences); // Debug log
+    res.json(preferences);
+  } catch (error) {
+    console.error("Error getting meal preferences:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateMealPreferences = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { breakfast, lunch, dinner } = req.body;
+    console.log('Updating meal preferences for student:', id, { breakfast, lunch, dinner }); // Debug log
+
+    if (typeof breakfast !== 'boolean' || typeof lunch !== 'boolean' || typeof dinner !== 'boolean') {
+      return res.status(400).json({ error: "Invalid meal preferences format" });
+    }
+
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Get today's date in UTC
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find or create today's meal history
+    let todayHistory = student.mealHistory.find(h => {
+      const historyDate = new Date(h.date);
+      historyDate.setHours(0, 0, 0, 0);
+      return historyDate.getTime() === today.getTime();
+    });
+
+    if (!todayHistory) {
+      todayHistory = {
+        date: today,
+        meals: [
+          { type: 'Breakfast', status: breakfast },
+          { type: 'Lunch', status: lunch },
+          { type: 'Dinner', status: dinner }
+        ],
+        isSubmitted: true
+      };
+      student.mealHistory.push(todayHistory);
+    } else {
+      // Update existing meal preferences
+      todayHistory.meals = todayHistory.meals.map(meal => {
+        switch (meal.type) {
+          case 'Breakfast':
+            return { ...meal, status: breakfast };
+          case 'Lunch':
+            return { ...meal, status: lunch };
+          case 'Dinner':
+            return { ...meal, status: dinner };
+          default:
+            return meal;
+        }
+      });
+    }
+
+    await student.save();
+    console.log('Updated meal preferences saved:', todayHistory); // Debug log
+
+    res.json({
+      breakfast,
+      lunch,
+      dinner
+    });
+  } catch (error) {
+    console.error("Error updating meal preferences:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };

@@ -8,15 +8,16 @@ export default function HomeForAdmin() {
     const navigate = useNavigate();
     return(
         <div className="home">
-            <h1>Food Safety</h1>
-            <div className="register-hostel">
-                <Register />
-               
-            </div>
-            <div className="search-hostel">
-                <h1>Search Hostel</h1>
-                <SearchHostel />
-                
+            <h1>Admin Dashboard</h1>
+            <div className="home-container">
+                <div className="register-hostel">
+                    <h2>Register Hostel</h2>
+                    <Register />
+                </div>
+                <div className="search-hostel">
+                    <h2>Search Hostel</h2>
+                    <SearchHostel />
+                </div>
             </div>
         </div>
     );
