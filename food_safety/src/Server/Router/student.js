@@ -6,7 +6,8 @@ import {
     loginStudent,
     getMealStatus,
     updateMealStatus,
-    getMealHistory 
+    getMealHistory,
+    submitMeals
 } from "../Controller/student.js";
 
 const studentRouter = express.Router();
@@ -26,5 +27,6 @@ studentRouter.delete("/:id", deleteStudent);
 studentRouter.get("/meal-status/:id", getMealStatus);
 studentRouter.put("/meal-status/:id", updateMealStatus);
 studentRouter.get("/meal-history/:id", getMealHistory);
+studentRouter.post("/submit-meals/:id", submitMeals);
 
 export default studentRouter;

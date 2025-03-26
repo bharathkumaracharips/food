@@ -38,7 +38,9 @@ const MealMonitoring = ({ hostelId }) => {
             }
         };
 
-        fetchStudents();
+        if (hostelId) {
+            fetchStudents();
+        }
     }, [hostelId]);
 
     // Fetch meal history for selected student
@@ -51,10 +53,11 @@ const MealMonitoring = ({ hostelId }) => {
                 const response = await fetch(`http://localhost:5001/student/meal-history/${selectedStudent}`);
                 if (response.ok) {
                     const data = await response.json();
-                    // Convert dates to moment objects
+                    // Convert dates to moment objects and ensure meals array exists
                     const formattedData = data.map(day => ({
                         ...day,
-                        date: moment(day.date).format('YYYY-MM-DD')
+                        date: moment(day.date).format('YYYY-MM-DD'),
+                        meals: day.meals || []
                     }));
                     setMealHistory(formattedData);
                     calculateMonthlyStats(formattedData, selectedMonth);
@@ -73,8 +76,10 @@ const MealMonitoring = ({ hostelId }) => {
     }, [selectedStudent, selectedMonth]);
 
     const calculateMonthlyStats = (history, month) => {
-        const startDate = month.startOf('month').format('YYYY-MM-DD');
-        const endDate = month.endOf('month').format('YYYY-MM-DD');
+        if (!month || !Array.isArray(history)) return;
+
+        const startDate = moment(month).startOf('month').format('YYYY-MM-DD');
+        const endDate = moment(month).endOf('month').format('YYYY-MM-DD');
 
         const monthlyMeals = history.filter(day => {
             return day.date >= startDate && day.date <= endDate;
@@ -114,8 +119,8 @@ const MealMonitoring = ({ hostelId }) => {
         setMonthlyStats(stats);
     };
 
-    const dateCellRender = (value) => {
-        const date = value.format('YYYY-MM-DD');
+    const cellRender = (current) => {
+        const date = current.format('YYYY-MM-DD');
         const dayHistory = mealHistory.find(h => h.date === date);
         
         if (dayHistory && Array.isArray(dayHistory.meals)) {
@@ -201,67 +206,40 @@ const MealMonitoring = ({ hostelId }) => {
                         />
                     </Col>
                 </Row>
-            </Card>
 
-            {selectedStudent && (
-                <>
-                    <Card title="Monthly Statistics" className="stats-card">
-                        <Row gutter={[16, 16]}>
-                            <Col span={6}>
-                                <Statistic
-                                    title="Total Breakfast"
-                                    value={monthlyStats.totalBreakfast}
-                                    suffix="meals"
-                                    loading={loading}
-                                />
-                            </Col>
-                            <Col span={6}>
-                                <Statistic
-                                    title="Total Lunch"
-                                    value={monthlyStats.totalLunch}
-                                    suffix="meals"
-                                    loading={loading}
-                                />
-                            </Col>
-                            <Col span={6}>
-                                <Statistic
-                                    title="Total Dinner"
-                                    value={monthlyStats.totalDinner}
-                                    suffix="meals"
-                                    loading={loading}
-                                />
-                            </Col>
-                            <Col span={6}>
-                                <Statistic
-                                    title="Total Cost"
-                                    value={monthlyStats.totalCost}
-                                    prefix="₹"
-                                    loading={loading}
-                                />
-                            </Col>
-                        </Row>
-                    </Card>
+                <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+                    <Col span={24}>
+                        <Calendar 
+                            loading={loading}
+                            cellRender={(current) => cellRender(current)}
+                            value={selectedMonth}
+                        />
+                    </Col>
+                </Row>
 
-                    <Card title="Meal Details" className="details-card">
+                <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+                    <Col span={24}>
                         <Table 
                             columns={columns} 
                             dataSource={tableData} 
                             pagination={false}
-                            loading={loading}
+                            summary={() => (
+                                <Table.Summary>
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell>Total</Table.Summary.Cell>
+                                        <Table.Summary.Cell>
+                                            {monthlyStats.totalBreakfast + monthlyStats.totalLunch + monthlyStats.totalDinner}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell>
+                                            ₹{monthlyStats.totalCost}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                    </Card>
-
-                    <Card title="Meal Calendar" className="calendar-card">
-                        <Calendar 
-                            dateCellRender={dateCellRender}
-                            fullscreen={false}
-                            className="meal-calendar"
-                            value={selectedMonth}
-                            loading={loading}
-                        />
-                    </Card>
-                </>
-            )}
+                    </Col>
+                </Row>
+            </Card>
         </div>
     );
 };

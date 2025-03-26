@@ -8,7 +8,7 @@ import './home.css';
 
 const OwnerHome = () => {
     const navigate = useNavigate();
-    const hostelData = JSON.parse(localStorage.getItem('hostelData'));
+    const [hostelData, setHostelData] = useState(null);
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -16,25 +16,19 @@ const OwnerHome = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [form] = Form.useForm();
 
-    useEffect(() => {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        if (!isLoggedIn || !hostelData) {
-            navigate('/owner/login');
-        } else {
-            fetchStudents();
+    const fetchStudents = async (hostelId) => {
+        if (!hostelId) {
+            console.error('No hostel ID provided');
+            return;
         }
-    }, [navigate]);
-
-    const fetchStudents = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelData.id}`);
-            const data = await response.json();
-            if (response.ok) {
-                setStudents(data);
-            } else {
-                message.error('Failed to fetch students');
+            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch students');
             }
+            const data = await response.json();
+            setStudents(data);
         } catch (error) {
             console.error('Error fetching students:', error);
             message.error('Failed to load students');
@@ -42,6 +36,31 @@ const OwnerHome = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const storedHostelData = localStorage.getItem('hostelData');
+        
+        if (!isLoggedIn || !storedHostelData) {
+            navigate('/owner/login');
+            return;
+        }
+
+        try {
+            const parsedHostelData = JSON.parse(storedHostelData);
+            if (!parsedHostelData || !parsedHostelData.id) {
+                message.error('Invalid hostel data. Please login again.');
+                handleLogout();
+                return;
+            }
+            setHostelData(parsedHostelData);
+            fetchStudents(parsedHostelData.id);
+        } catch (error) {
+            console.error('Error loading hostel data:', error);
+            message.error('Error loading hostel data. Please login again.');
+            handleLogout();
+        }
+    }, [navigate]); // Only re-run if navigate changes
 
     const handleRemoveStudent = async (studentId) => {
         try {
@@ -51,7 +70,8 @@ const OwnerHome = () => {
 
             if (response.ok) {
                 message.success('Student removed successfully');
-                fetchStudents();
+                // Use hostelData from state
+                hostelData && fetchStudents(hostelData.id);
             } else {
                 message.error('Failed to remove student');
             }
@@ -175,7 +195,7 @@ const OwnerHome = () => {
         {
             key: '3',
             label: 'Meal History',
-            children: <MealMonitoring hostelId={hostelData.id} />,
+            children: <MealMonitoring hostelId={hostelData?.id} />,
         },
     ];
 
@@ -221,7 +241,7 @@ const OwnerHome = () => {
                     hostelId={hostelData.id} 
                     onSuccess={() => {
                         setIsModalVisible(false);
-                        fetchStudents();
+                        hostelData && fetchStudents(hostelData.id);
                     }}
                 />
             </Modal>

@@ -19,48 +19,30 @@ const StudentFoodTable = () => {
             return;
         }
 
-        setLoading(true);
         try {
-            // First fetch all students
-            const studentsResponse = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelData.id}`);
-            if (!studentsResponse.ok) {
+            setLoading(true);
+            const response = await fetch(`http://localhost:5001/hostel/get-all-students/${hostelData.id}`);
+            if (!response.ok) {
                 throw new Error('Failed to fetch students');
             }
-            const studentsData = await studentsResponse.json();
+            const studentsData = await response.json();
 
-            // Then fetch today's meal status for each student
-            const processedData = await Promise.all(studentsData.map(async (student) => {
-                try {
-                    const mealResponse = await fetch(`http://localhost:5001/student/get-today-meals/${student._id}`);
-                    if (!mealResponse.ok) {
-                        return {
-                            ...student,
-                            key: student._id,
-                            breakfast: false,
-                            lunch: false,
-                            dinner: false
-                        };
-                    }
-                    const mealData = await mealResponse.json();
-                    
-                    return {
-                        ...student,
-                        key: student._id,
-                        breakfast: mealData.find(m => m.type.toLowerCase() === 'breakfast')?.status || false,
-                        lunch: mealData.find(m => m.type.toLowerCase() === 'lunch')?.status || false,
-                        dinner: mealData.find(m => m.type.toLowerCase() === 'dinner')?.status || false
-                    };
-                } catch (error) {
-                    console.error(`Error fetching meals for student ${student._id}:`, error);
-                    return {
-                        ...student,
-                        key: student._id,
-                        breakfast: false,
-                        lunch: false,
-                        dinner: false
-                    };
-                }
-            }));
+            // Process the data to include today's meal status
+            const today = new Date().toLocaleDateString('en-CA');
+            const processedData = studentsData.map(student => {
+                const todayHistory = student.mealHistory?.find(h => {
+                    const historyDate = new Date(h.date);
+                    return historyDate.toISOString().split('T')[0] === today;
+                });
+
+                return {
+                    ...student,
+                    key: student._id,
+                    breakfast: todayHistory?.meals?.find(m => m.type === 'Breakfast')?.status || false,
+                    lunch: todayHistory?.meals?.find(m => m.type === 'Lunch')?.status || false,
+                    dinner: todayHistory?.meals?.find(m => m.type === 'Dinner')?.status || false
+                };
+            });
             
             setStudents(processedData);
 
@@ -83,6 +65,11 @@ const StudentFoodTable = () => {
     // Initial fetch only
     useEffect(() => {
         fetchStudents();
+        
+        // Set up polling for real-time updates
+        const interval = setInterval(fetchStudents, 30000); // Poll every 30 seconds
+        
+        return () => clearInterval(interval);
     }, []);
 
     const handleRefresh = () => {
@@ -199,10 +186,7 @@ const StudentFoodTable = () => {
                 columns={columns}
                 dataSource={students}
                 loading={loading}
-                pagination={{
-                    pageSize: 10,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} students`,
-                }}
+                pagination={{ pageSize: 10 }}
             />
         </div>
     );

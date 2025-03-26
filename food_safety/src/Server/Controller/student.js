@@ -167,7 +167,7 @@ export const updateMealStatus = async (req, res) => {
       return res.status(400).json({ error: "Meal type, status, and date are required" });
     }
 
-    if (!['breakfast', 'lunch', 'dinner'].includes(meal)) {
+    if (!['breakfast', 'lunch', 'dinner'].includes(meal.toLowerCase())) {
       return res.status(400).json({ error: "Invalid meal type" });
     }
 
@@ -176,13 +176,14 @@ export const updateMealStatus = async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Convert date string to Date object and set to start of day
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    // Convert date string to Date object in UTC
+    const [year, month, day] = date.split('-').map(Number);
+    const targetDate = new Date(Date.UTC(year, month - 1, day));
 
-    // Check if the date is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get today's date in UTC
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
     if (targetDate < today) {
       return res.status(400).json({ error: "Cannot modify meal preferences for past dates" });
     }
@@ -190,25 +191,39 @@ export const updateMealStatus = async (req, res) => {
     // Find history entry for the target date or create new one
     let dayHistory = student.mealHistory.find(h => {
       const historyDate = new Date(h.date);
-      return historyDate.getTime() === targetDate.getTime();
+      return historyDate.toISOString().split('T')[0] === targetDate.toISOString().split('T')[0];
     });
 
     if (!dayHistory) {
       dayHistory = {
         date: targetDate,
-        breakfast: false,
-        lunch: false,
-        dinner: false
+        meals: [
+          { type: 'Breakfast', status: meal.toLowerCase() === 'breakfast' ? status : false },
+          { type: 'Lunch', status: meal.toLowerCase() === 'lunch' ? status : false },
+          { type: 'Dinner', status: meal.toLowerCase() === 'dinner' ? status : false }
+        ],
+        isSubmitted: false
       };
       student.mealHistory.push(dayHistory);
+    } else {
+      // Update existing meal status
+      const mealIndex = dayHistory.meals.findIndex(m => 
+        m.type.toLowerCase() === meal.toLowerCase()
+      );
+      
+      if (mealIndex !== -1) {
+        dayHistory.meals[mealIndex].status = status;
+      } else {
+        dayHistory.meals.push({
+          type: meal.charAt(0).toUpperCase() + meal.slice(1),
+          status: status
+        });
+      }
     }
 
-    // Update the meal status for the specific date
-    dayHistory[meal] = status;
-
     // If the date is today, also update the current meal status
-    if (targetDate.getTime() === today.getTime()) {
-      student[meal] = status;
+    if (targetDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]) {
+      student[meal.toLowerCase()] = status;
     }
 
     // Save the student document
@@ -216,7 +231,7 @@ export const updateMealStatus = async (req, res) => {
 
     res.json({
       message: `${meal} status updated successfully for ${date}`,
-      [meal]: status
+      meals: dayHistory.meals
     });
   } catch (error) {
     console.error("Error updating meal status:", error);
@@ -235,43 +250,31 @@ export const getMealHistory = async (req, res) => {
 
     // Get the last 30 days of meal history
     const history = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     
     for (let i = 0; i < 30; i++) {
       const date = new Date(today);
-      date.setDate(date.getDate() - i);
+      date.setUTCDate(date.getUTCDate() - i);
       
       // Find history entry for this date
       const dayHistory = student.mealHistory.find(h => {
         const historyDate = new Date(h.date);
-        return historyDate.getTime() === date.getTime();
+        return historyDate.toISOString().split('T')[0] === date.toISOString().split('T')[0];
       });
 
       // If no history for this date, use default values
-      const entry = dayHistory || {
-        breakfast: false,
-        lunch: false,
-        dinner: false
+      const entry = {
+        date: date.toISOString().split('T')[0],
+        meals: dayHistory ? dayHistory.meals : [
+          { type: 'Breakfast', status: false },
+          { type: 'Lunch', status: false },
+          { type: 'Dinner', status: false }
+        ],
+        isSubmitted: dayHistory ? dayHistory.isSubmitted : false
       };
 
-      history.push({
-        date: date.toISOString().split('T')[0],
-        meals: [
-          {
-            type: 'Breakfast',
-            status: entry.breakfast
-          },
-          {
-            type: 'Lunch',
-            status: entry.lunch
-          },
-          {
-            type: 'Dinner',
-            status: entry.dinner
-          }
-        ]
-      });
+      history.push(entry);
     }
 
     res.json(history);
@@ -279,4 +282,80 @@ export const getMealHistory = async (req, res) => {
     console.error("Error fetching meal history:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+};
+
+export const submitMeals = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { date, meals } = req.body;
+
+        if (!date || !meals) {
+            return res.status(400).json({ error: "Date and meals are required" });
+        }
+
+        const student = await Student.findById(id);
+        if (!student) {
+            return res.status(404).json({ error: "Student not found" });
+        }
+
+        // Convert date string to Date object in UTC
+        const [year, month, day] = date.split('-').map(Number);
+        const targetDate = new Date(Date.UTC(year, month - 1, day));
+
+        // Get today's date in UTC
+        const now = new Date();
+        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+        // Compare dates using ISO strings to avoid timezone issues
+        if (targetDate.toISOString().split('T')[0] < today.toISOString().split('T')[0]) {
+            return res.status(400).json({ error: "Cannot submit meal preferences for past dates" });
+        }
+
+        // Find or create history entry for the target date
+        let dayHistory = student.mealHistory.find(h => {
+            const historyDate = new Date(h.date);
+            return historyDate.toISOString().split('T')[0] === targetDate.toISOString().split('T')[0];
+        });
+
+        if (!dayHistory) {
+            dayHistory = {
+                date: targetDate,
+                meals: [
+                    { type: 'Breakfast', status: meals.breakfast },
+                    { type: 'Lunch', status: meals.lunch },
+                    { type: 'Dinner', status: meals.dinner }
+                ],
+                isSubmitted: true
+            };
+            student.mealHistory.push(dayHistory);
+        } else {
+            // Update existing history
+            dayHistory.meals = [
+                { type: 'Breakfast', status: meals.breakfast },
+                { type: 'Lunch', status: meals.lunch },
+                { type: 'Dinner', status: meals.dinner }
+            ];
+            dayHistory.isSubmitted = true;
+        }
+
+        // If the date is today, also update the current meal status
+        if (targetDate.toISOString().split('T')[0] === today.toISOString().split('T')[0]) {
+            student.breakfast = meals.breakfast;
+            student.lunch = meals.lunch;
+            student.dinner = meals.dinner;
+        }
+
+        // Save the student document
+        await student.save();
+
+        res.json({
+            message: "Meal preferences submitted successfully",
+            date,
+            meals: dayHistory.meals,
+            isSubmitted: true
+        });
+    } catch (error) {
+        console.error("Error submitting meal preferences:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 };

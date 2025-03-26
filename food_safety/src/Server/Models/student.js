@@ -2,9 +2,11 @@ import mongoose from "mongoose";
 
 const mealHistorySchema = new mongoose.Schema({
     date: { type: Date, required: true },
-    breakfast: { type: Boolean, default: false },
-    lunch: { type: Boolean, default: false },
-    dinner: { type: Boolean, default: false }
+    meals: [{
+        type: { type: String, enum: ['Breakfast', 'Lunch', 'Dinner'], required: true },
+        status: { type: Boolean, default: false }
+    }],
+    isSubmitted: { type: Boolean, default: false }
 });
 
 const studentSchema = new mongoose.Schema({

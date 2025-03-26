@@ -14,6 +14,7 @@ const Dashboard = () => {
         lunch: false,
         dinner: false
     });
+    const [isSubmitted, setIsSubmitted] = useState(false);
     const [hostelDetails, setHostelDetails] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [mealHistory, setMealHistory] = useState([]);
@@ -73,7 +74,7 @@ const Dashboard = () => {
                         setMealHistory(historyData);
                         
                         // Set current meal status based on today's date
-                        const today = new Date().toISOString().split('T')[0];
+                        const today = new Date().toLocaleDateString('en-CA');
                         const todayHistory = historyData.find(h => h.date === today);
                         if (todayHistory) {
                             const currentStatus = {
@@ -82,6 +83,7 @@ const Dashboard = () => {
                                 dinner: todayHistory.meals.find(m => m.type === 'Dinner')?.status || false
                             };
                             setMealStatus(currentStatus);
+                            setIsSubmitted(todayHistory.isSubmitted || false);
                         }
                     } else {
                         message.error('Failed to fetch meal history');
@@ -96,26 +98,110 @@ const Dashboard = () => {
         fetchData();
     }, [navigate]);
 
+    const handleSubmit = async () => {
+        if (!studentData?._id) {
+            message.error('Student ID not found');
+            return;
+        }
+
+        try {
+            const today = new Date().toLocaleDateString('en-CA');
+            const response = await fetch(`http://localhost:5001/student/submit-meals/${studentData._id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: today,
+                    meals: {
+                        breakfast: mealStatus.breakfast,
+                        lunch: mealStatus.lunch,
+                        dinner: mealStatus.dinner
+                    }
+                }),
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                setIsSubmitted(true);
+                message.success('Meal preferences submitted successfully');
+                
+                // Update meal history to reflect submission
+                setMealHistory(prev => {
+                    const updatedHistory = [...prev];
+                    const todayIndex = updatedHistory.findIndex(h => h.date === today);
+                    if (todayIndex !== -1) {
+                        updatedHistory[todayIndex] = {
+                            date: today,
+                            meals: [
+                                { type: 'Breakfast', status: mealStatus.breakfast },
+                                { type: 'Lunch', status: mealStatus.lunch },
+                                { type: 'Dinner', status: mealStatus.dinner }
+                            ],
+                            isSubmitted: true
+                        };
+                    } else {
+                        // Add new entry if not found
+                        updatedHistory.unshift({
+                            date: today,
+                            meals: [
+                                { type: 'Breakfast', status: mealStatus.breakfast },
+                                { type: 'Lunch', status: mealStatus.lunch },
+                                { type: 'Dinner', status: mealStatus.dinner }
+                            ],
+                            isSubmitted: true
+                        });
+                    }
+                    return updatedHistory;
+                });
+
+                // Refresh meal history from server to ensure consistency
+                const historyResponse = await fetch(`http://localhost:5001/student/meal-history/${studentData._id}`);
+                if (historyResponse.ok) {
+                    const historyData = await historyResponse.json();
+                    setMealHistory(historyData);
+                }
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to submit meal preferences');
+            }
+        } catch (error) {
+            console.error('Error submitting meal preferences:', error);
+            message.error('Failed to submit meal preferences');
+        }
+    };
+
     const handleMealToggle = async (meal, date = new Date()) => {
         if (!studentData?._id) {
             message.error('Student ID not found');
             return;
         }
 
+        // Check if already submitted for today
+        const today = new Date().toLocaleDateString('en-CA');
+        const todayHistory = mealHistory.find(h => h.date === today);
+        if (todayHistory?.isSubmitted) {
+            message.error('Meal preferences have been submitted and cannot be changed');
+            return;
+        }
+
         // Check if the date is in the past
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const targetDate = new Date(date);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        
+        // Ensure we're working with the correct date
+        const targetDate = date instanceof Date ? date : new Date(date);
         targetDate.setHours(0, 0, 0, 0);
 
-        if (targetDate < today) {
+        if (targetDate < todayDate) {
             message.error('Cannot modify meal preferences for past dates');
             return;
         }
+
+        // Format date in YYYY-MM-DD format for the current timezone
+        const dateStr = targetDate.toLocaleDateString('en-CA');
         
         try {
-            const dateStr = date.toISOString().split('T')[0];
-            
             // Find the current status for the specific date
             const dayHistory = mealHistory.find(h => h.date === dateStr);
             const currentStatus = dayHistory?.meals.find(m => 
@@ -136,8 +222,8 @@ const Dashboard = () => {
 
             if (response.ok) {
                 // Update local state only if the date is today
-                const today = new Date().toISOString().split('T')[0];
-                if (dateStr === today) {
+                const todayStr = new Date().toLocaleDateString('en-CA');
+                if (dateStr === todayStr) {
                     setMealStatus(prev => ({
                         ...prev,
                         [meal]: !currentStatus
@@ -199,7 +285,7 @@ const Dashboard = () => {
         navigate('/user/login');
     };
 
-    const dateCellRender = (value) => {
+    const cellRender = (value) => {
         const date = value.format('YYYY-MM-DD');
         const dayHistory = mealHistory.find(h => h.date === date);
         
@@ -287,6 +373,7 @@ const Dashboard = () => {
                                 <Switch
                                     checked={mealStatus.breakfast}
                                     onChange={() => handleMealToggle('breakfast')}
+                                    disabled={isSubmitted}
                                 />
                             }
                         >
@@ -301,6 +388,7 @@ const Dashboard = () => {
                                 <Switch
                                     checked={mealStatus.lunch}
                                     onChange={() => handleMealToggle('lunch')}
+                                    disabled={isSubmitted}
                                 />
                             }
                         >
@@ -315,6 +403,7 @@ const Dashboard = () => {
                                 <Switch
                                     checked={mealStatus.dinner}
                                     onChange={() => handleMealToggle('dinner')}
+                                    disabled={isSubmitted}
                                 />
                             }
                         >
@@ -322,14 +411,19 @@ const Dashboard = () => {
                         </Card>
                     </Col>
                 </Row>
+                <Row justify="end" style={{ marginTop: '16px' }}>
+                    <Button
+                        type="primary"
+                        onClick={handleSubmit}
+                        disabled={isSubmitted}
+                    >
+                        {isSubmitted ? 'Submitted' : 'Submit Preferences'}
+                    </Button>
+                </Row>
             </Card>
 
             <Card title="Meal History" className="meal-history-card">
-                <Calendar 
-                    dateCellRender={dateCellRender}
-                    fullscreen={false}
-                    className="meal-calendar"
-                />
+                <Calendar cellRender={cellRender} />
             </Card>
         </div>
     );
