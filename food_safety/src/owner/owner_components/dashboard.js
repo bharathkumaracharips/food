@@ -33,7 +33,7 @@ const OwnerDashboard = () => {
             setStudents(data);
 
             // Calculate meal counts
-            const today = new Date().toLocaleDateString('en-CA');
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
             const counts = {
                 breakfast: 0,
                 lunch: 0,
@@ -85,7 +85,7 @@ const OwnerDashboard = () => {
             title: 'Breakfast',
             key: 'breakfast',
             render: (_, record) => {
-                const today = new Date().toLocaleDateString('en-CA');
+                const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
                 const todayHistory = record.mealHistory?.find(h => h.date === today);
                 const status = todayHistory?.meals.find(m => m.type === 'Breakfast')?.status;
                 return <span className={status ? 'opted-in' : 'opted-out'}>
@@ -97,7 +97,7 @@ const OwnerDashboard = () => {
             title: 'Lunch',
             key: 'lunch',
             render: (_, record) => {
-                const today = new Date().toLocaleDateString('en-CA');
+                const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
                 const todayHistory = record.mealHistory?.find(h => h.date === today);
                 const status = todayHistory?.meals.find(m => m.type === 'Lunch')?.status;
                 return <span className={status ? 'opted-in' : 'opted-out'}>
@@ -109,7 +109,7 @@ const OwnerDashboard = () => {
             title: 'Dinner',
             key: 'dinner',
             render: (_, record) => {
-                const today = new Date().toLocaleDateString('en-CA');
+                const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
                 const todayHistory = record.mealHistory?.find(h => h.date === today);
                 const status = todayHistory?.meals.find(m => m.type === 'Dinner')?.status;
                 return <span className={status ? 'opted-in' : 'opted-out'}>

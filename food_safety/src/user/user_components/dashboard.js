@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Button, Row, Col, Switch, message, Calendar, Tabs } from 'antd';
-import { LogoutOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Card, Typography, Button, Row, Col, message, Calendar, Tabs, Tag } from 'antd';
+import { LogoutOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import StudentMenuView from './student_menu_view';
@@ -101,83 +101,6 @@ const Dashboard = () => {
 
         fetchData();
     }, [navigate]);
-
-    const handleSubmit = async () => {
-        if (!studentData?._id) {
-            message.error('Student ID not found');
-            return;
-        }
-
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            const response = await fetch(`http://localhost:5001/api/student/submit-meals/${studentData._id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    date: today,
-                    meals: {
-                        breakfast: mealStatus.breakfast,
-                        lunch: mealStatus.lunch,
-                        dinner: mealStatus.dinner
-                    }
-                }),
-            });
-
-            if (response.ok) {
-                setIsSubmitted(true);
-                message.success('Meal preferences submitted successfully');
-                
-                // Update meal history
-                const historyResponse = await fetch(`http://localhost:5001/api/student/meal-history/${studentData._id}`);
-                if (historyResponse.ok) {
-                    const historyData = await historyResponse.json();
-                    setMealHistory(historyData);
-                }
-            } else {
-                throw new Error('Failed to submit meal preferences');
-            }
-        } catch (error) {
-            console.error('Error submitting meal preferences:', error);
-            message.error('Failed to submit meal preferences');
-        }
-    };
-
-    const handleMealToggle = async (meal) => {
-        if (!studentData?._id) {
-            message.error('Student ID not found');
-            return;
-        }
-
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            const response = await fetch(`http://localhost:5001/api/student/meal-status/${studentData._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    meal,
-                    status: !mealStatus[meal],
-                    date: today
-                }),
-            });
-
-            if (response.ok) {
-                setMealStatus(prev => ({
-                    ...prev,
-                    [meal]: !prev[meal]
-                }));
-                message.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} ${!mealStatus[meal] ? 'opted in' : 'opted out'}`);
-            } else {
-                throw new Error('Failed to update meal status');
-            }
-        } catch (error) {
-            console.error('Error updating meal status:', error);
-            message.error('Failed to update meal status');
-        }
-    };
     
     const handleLogout = () => {
         localStorage.removeItem('studentData');
@@ -226,60 +149,63 @@ const Dashboard = () => {
                             <Col span={8}>
                                 <Card>
                                     <Title level={4}>Breakfast</Title>
-                                    <Switch
-                                        checked={mealStatus.breakfast}
-                                        onChange={() => handleMealToggle('breakfast')}
-                                    />
-                                    <span style={{ marginLeft: '8px' }}>
-                                        {mealStatus.breakfast ? 'Opted In' : 'Opted Out'}
-                                    </span>
+                                    <div className="meal-status-display">
+                                        {mealStatus.breakfast ? (
+                                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                                Opted In
+                                            </Tag>
+                                        ) : (
+                                            <Tag icon={<CloseCircleOutlined />} color="error">
+                                                Opted Out
+                                            </Tag>
+                                        )}
+                                    </div>
                                 </Card>
                             </Col>
                             <Col span={8}>
                                 <Card>
                                     <Title level={4}>Lunch</Title>
-                                    <Switch
-                                        checked={mealStatus.lunch}
-                                        onChange={() => handleMealToggle('lunch')}
-                                    />
-                                    <span style={{ marginLeft: '8px' }}>
-                                        {mealStatus.lunch ? 'Opted In' : 'Opted Out'}
-                                    </span>
+                                    <div className="meal-status-display">
+                                        {mealStatus.lunch ? (
+                                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                                Opted In
+                                            </Tag>
+                                        ) : (
+                                            <Tag icon={<CloseCircleOutlined />} color="error">
+                                                Opted Out
+                                            </Tag>
+                                        )}
+                                    </div>
                                 </Card>
                             </Col>
                             <Col span={8}>
                                 <Card>
                                     <Title level={4}>Dinner</Title>
-                                    <Switch
-                                        checked={mealStatus.dinner}
-                                        onChange={() => handleMealToggle('dinner')}
-                                    />
-                                    <span style={{ marginLeft: '8px' }}>
-                                        {mealStatus.dinner ? 'Opted In' : 'Opted Out'}
-                                    </span>
+                                    <div className="meal-status-display">
+                                        {mealStatus.dinner ? (
+                                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                                Opted In
+                                            </Tag>
+                                        ) : (
+                                            <Tag icon={<CloseCircleOutlined />} color="error">
+                                                Opted Out
+                                            </Tag>
+                                        )}
+                                    </div>
                                 </Card>
                             </Col>
                         </Row>
-                        <Row justify="end" style={{ marginTop: '16px' }}>
-                            <Button
-                                type="primary"
-                                onClick={handleSubmit}
-                                disabled={isSubmitted}
-                            >
-                                {isSubmitted ? 'Submitted' : 'Submit Preferences'}
-                            </Button>
-                        </Row>
+                        {isSubmitted && (
+                            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                                <Tag color="blue" style={{ padding: '4px 8px' }}>
+                                    Meal preferences have been submitted for today
+                                </Tag>
+                            </div>
+                        )}
                     </Card>
-
-                    <Card className="meal-history-card">
-                        <Title level={3}>Meal History</Title>
-                        <Calendar
-                            fullscreen={false}
-                            value={selectedDate}
-                            onChange={(date) => setSelectedDate(date)}
-                            cellRender={cellRender}
-                            defaultValue={dayjs()}
-                        />
+                    
+                    <Card title="Meal History" className="meal-history-card">
+                        <Calendar cellRender={cellRender} value={selectedDate} onChange={setSelectedDate} />
                     </Card>
                 </div>
             ),
@@ -301,17 +227,25 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            <div className="header">
-                <Title level={2}>Welcome, {studentData.name || 'Student'}</Title>
-                <Button
-                    type="primary"
-                    danger
-                    icon={<LogoutOutlined />}
+            <div className="dashboard-header">
+                <Title level={2}>Student Dashboard</Title>
+                <Button 
+                    type="primary" 
+                    icon={<LogoutOutlined />} 
                     onClick={handleLogout}
+                    danger
                 >
                     Logout
                 </Button>
             </div>
+
+            {studentData && (
+                <Card className="student-info-card">
+                    <Title level={4}>Welcome, {studentData.name}</Title>
+                    <p>Roll Number: {studentData.rollNumber}</p>
+                    {hostelDetails && <p>Hostel: {hostelDetails.name}</p>}
+                </Card>
+            )}
 
             <Tabs defaultActiveKey="1" items={items} />
         </div>

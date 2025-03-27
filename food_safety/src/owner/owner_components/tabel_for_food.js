@@ -32,7 +32,8 @@ const StudentFoodTable = () => {
             console.log('Received students data:', studentsData); // Debug log
 
             // Process the data to include today's meal status
-            const today = new Date().toLocaleDateString('en-CA');
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            
             const processedData = studentsData.map(student => {
                 const todayHistory = student.mealHistory?.find(h => {
                     const historyDate = new Date(h.date);

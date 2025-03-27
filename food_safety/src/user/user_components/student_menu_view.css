@@ -57,12 +57,25 @@
 
 .meal-cell {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
 }
 
 .meal-cell .ant-btn {
     align-self: flex-start;
+}
+
+.submitted-button {
+    opacity: 0.8;
+    cursor: not-allowed !important;
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+}
+
+.submitted-button:hover {
+    opacity: 0.8;
+    background-color: #f5f5f5 !important;
+    border-color: #d9d9d9 !important;
 }
 
 @media (max-width: 768px) {

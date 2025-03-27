@@ -200,7 +200,7 @@ const WeeklyMenu = () => {
             
             <Card title="Today's Menu" className="today-menu-card">
                 <div className="today-menu-content">
-                    <h3>{Object.keys(menuData)[new Date().getDay()]}</h3>
+                    <h3>{new Date().toLocaleDateString('en-US', { weekday: 'long' })}</h3>
                     <p><strong>Breakfast:</strong> {getCurrentDayMenu().breakfast}</p>
                     <p><strong>Lunch:</strong> {getCurrentDayMenu().lunch}</p>
                     <p><strong>Dinner:</strong> {getCurrentDayMenu().dinner}</p>

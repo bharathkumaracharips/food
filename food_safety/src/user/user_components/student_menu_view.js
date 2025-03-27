@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, message, Typography, Tag } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, LockOutlined } from '@ant-design/icons';
 import './student_menu_view.css';
 import axios from 'axios';
 
@@ -110,7 +110,7 @@ const StudentMenuView = () => {
     const handleMealToggle = async (mealType, status) => {
         // Check submission status first
         if (isSubmitted) {
-            message.warning('Meal preferences have already been submitted for today');
+            message.warning('Meal preferences have already been submitted for today and cannot be changed');
             return;
         }
 
@@ -209,15 +209,25 @@ const StudentMenuView = () => {
                 <div className="meal-cell">
                     <span>{text}</span>
                     {record.day === new Date().toLocaleDateString('en-US', { weekday: 'long' }) && (
-                        <Button
-                            type={mealPreferences.breakfast ? 'primary' : 'default'}
-                            icon={mealPreferences.breakfast ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-                            onClick={() => handleMealToggle('breakfast', !mealPreferences.breakfast)}
-                            size="small"
-                            disabled={isSubmitted}
-                        >
-                            {mealPreferences.breakfast ? 'Opted In' : 'Opted Out'}
-                        </Button>
+                        <>
+                            <Button
+                                type={mealPreferences.breakfast ? 'primary' : 'default'}
+                                icon={isSubmitted ? <LockOutlined /> : (mealPreferences.breakfast ? <CheckCircleOutlined /> : <CloseCircleOutlined />)}
+                                onClick={() => handleMealToggle('breakfast', !mealPreferences.breakfast)}
+                                size="small"
+                                disabled={isSubmitted}
+                                className={isSubmitted ? 'submitted-button' : ''}
+                            >
+                                {isSubmitted 
+                                    ? (mealPreferences.breakfast ? 'Opted In (Locked)' : 'Opted Out (Locked)') 
+                                    : (mealPreferences.breakfast ? 'Opted In' : 'Opted Out')}
+                            </Button>
+                            {isSubmitted && (
+                                <Tag color={mealPreferences.breakfast ? 'green' : 'red'} style={{ marginLeft: '8px' }}>
+                                    Submitted
+                                </Tag>
+                            )}
+                        </>
                     )}
                 </div>
             ),
@@ -230,15 +240,25 @@ const StudentMenuView = () => {
                 <div className="meal-cell">
                     <span>{text}</span>
                     {record.day === new Date().toLocaleDateString('en-US', { weekday: 'long' }) && (
-                        <Button
-                            type={mealPreferences.lunch ? 'primary' : 'default'}
-                            icon={mealPreferences.lunch ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-                            onClick={() => handleMealToggle('lunch', !mealPreferences.lunch)}
-                            size="small"
-                            disabled={isSubmitted}
-                        >
-                            {mealPreferences.lunch ? 'Opted In' : 'Opted Out'}
-                        </Button>
+                        <>
+                            <Button
+                                type={mealPreferences.lunch ? 'primary' : 'default'}
+                                icon={isSubmitted ? <LockOutlined /> : (mealPreferences.lunch ? <CheckCircleOutlined /> : <CloseCircleOutlined />)}
+                                onClick={() => handleMealToggle('lunch', !mealPreferences.lunch)}
+                                size="small"
+                                disabled={isSubmitted}
+                                className={isSubmitted ? 'submitted-button' : ''}
+                            >
+                                {isSubmitted 
+                                    ? (mealPreferences.lunch ? 'Opted In (Locked)' : 'Opted Out (Locked)') 
+                                    : (mealPreferences.lunch ? 'Opted In' : 'Opted Out')}
+                            </Button>
+                            {isSubmitted && (
+                                <Tag color={mealPreferences.lunch ? 'green' : 'red'} style={{ marginLeft: '8px' }}>
+                                    Submitted
+                                </Tag>
+                            )}
+                        </>
                     )}
                 </div>
             ),
@@ -251,15 +271,25 @@ const StudentMenuView = () => {
                 <div className="meal-cell">
                     <span>{text}</span>
                     {record.day === new Date().toLocaleDateString('en-US', { weekday: 'long' }) && (
-                        <Button
-                            type={mealPreferences.dinner ? 'primary' : 'default'}
-                            icon={mealPreferences.dinner ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-                            onClick={() => handleMealToggle('dinner', !mealPreferences.dinner)}
-                            size="small"
-                            disabled={isSubmitted}
-                        >
-                            {mealPreferences.dinner ? 'Opted In' : 'Opted Out'}
-                        </Button>
+                        <>
+                            <Button
+                                type={mealPreferences.dinner ? 'primary' : 'default'}
+                                icon={isSubmitted ? <LockOutlined /> : (mealPreferences.dinner ? <CheckCircleOutlined /> : <CloseCircleOutlined />)}
+                                onClick={() => handleMealToggle('dinner', !mealPreferences.dinner)}
+                                size="small"
+                                disabled={isSubmitted}
+                                className={isSubmitted ? 'submitted-button' : ''}
+                            >
+                                {isSubmitted 
+                                    ? (mealPreferences.dinner ? 'Opted In (Locked)' : 'Opted Out (Locked)') 
+                                    : (mealPreferences.dinner ? 'Opted In' : 'Opted Out')}
+                            </Button>
+                            {isSubmitted && (
+                                <Tag color={mealPreferences.dinner ? 'green' : 'red'} style={{ marginLeft: '8px' }}>
+                                    Submitted
+                                </Tag>
+                            )}
+                        </>
                     )}
                 </div>
             ),
