@@ -10,8 +10,7 @@ export const registerStudent = async (req, res) => {
     const existingStudent = await Student.findOne({
       $or: [
         { email },
-        { username },
-        { roomNo, hostelId }, // Check if room is already occupied in this hostel
+        { username }
       ],
     });
 
@@ -21,9 +20,6 @@ export const registerStudent = async (req, res) => {
       }
       if (existingStudent.username === username) {
         return res.status(400).json({ error: "Username already taken" });
-      }
-      if (existingStudent.roomNo === roomNo) {
-        return res.status(400).json({ error: "Room already occupied" });
       }
     }
 

@@ -9,7 +9,7 @@ const RegisterStudent = ({ hostelId, onSuccess }) => {
         console.log(values);
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/student/register', {
+            const response = await fetch('http://localhost:5001/api/student/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
