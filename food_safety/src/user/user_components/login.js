@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Select, message, Card } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 import './login.css';
 
 const { Option } = Select;
@@ -9,6 +10,7 @@ const StudentLogin = () => {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     const fetchHostels = async () => {
@@ -48,8 +50,8 @@ const StudentLogin = () => {
         throw new Error(data.error || "Login failed");
       }
 
-      // Store student data in localStorage
-      localStorage.setItem("studentData", JSON.stringify(data));
+      // Use the auth context to handle login
+      login(data, 'student');
       message.success("Login successful");
       
       // Navigate to dashboard

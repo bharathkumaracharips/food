@@ -108,3 +108,22 @@ export const getAllHostels = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const searchHostelByName = async (req, res) => {
+  try {
+    const { hostelName } = req.params;
+    const hostel = await Hostel.findOne(
+      { name: { $regex: new RegExp(hostelName, 'i') } },
+      { password: 0 } // Exclude password field
+    );
+    
+    if (!hostel) {
+      return res.status(404).json({ error: "Hostel not found" });
+    }
+    
+    res.json(hostel);
+  } catch (error) {
+    console.error("Error searching hostel:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

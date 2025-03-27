@@ -18,7 +18,7 @@ const SearchHostel = () => {
         setHostel(null);
         
         try {
-            const response = await fetch(`http://localhost:5001/hostels/${encodeURIComponent(hostelName)}`, {
+            const response = await fetch(`http://localhost:5001/api/hostel/search/${encodeURIComponent(hostelName)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
