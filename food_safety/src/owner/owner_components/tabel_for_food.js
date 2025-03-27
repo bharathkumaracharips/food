@@ -37,18 +37,18 @@ const StudentFoodTable = () => {
             const processedData = studentsData.map(student => {
                 const todayHistory = student.mealHistory?.find(h => {
                     const historyDate = new Date(h.date);
-                    return historyDate.toISOString().split('T')[0] === today;
+                    const today = new Date();
+                    return historyDate.toISOString().split('T')[0] === today.toISOString().split('T')[0];
                 });
 
                 return {
                     ...student,
                     key: student._id,
-                    breakfast: todayHistory?.meals?.find(m => m.type === 'Breakfast')?.status || false,
-                    lunch: todayHistory?.meals?.find(m => m.type === 'Lunch')?.status || false,
-                    dinner: todayHistory?.meals?.find(m => m.type === 'Dinner')?.status || false
+                    breakfast: todayHistory?.meals?.find(m => m.type === 'Breakfast')?.status ?? false,
+                    lunch: todayHistory?.meals?.find(m => m.type === 'Lunch')?.status ?? false,
+                    dinner: todayHistory?.meals?.find(m => m.type === 'Dinner')?.status ?? false
                 };
             });
-            
             setStudents(processedData);
 
             // Calculate statistics
