@@ -19,7 +19,7 @@ const SearchHostel = () => {
         
         try {
             const response = await fetch(`http://localhost:5001/api/hostel/search/${encodeURIComponent(hostelName)}`, {
-                method: 'GET',
+                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 }

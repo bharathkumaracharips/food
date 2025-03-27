@@ -242,7 +242,7 @@ const Dashboard = () => {
             {studentData && (
                 <Card className="student-info-card">
                     <Title level={4}>Welcome, {studentData.name}</Title>
-                    <p>Roll Number: {studentData.rollNumber}</p>
+                    
                     {hostelDetails && <p>Hostel: {hostelDetails.name}</p>}
                 </Card>
             )}

@@ -7,6 +7,9 @@ import OwnerLogin from "./owner/owner_components/login.js";
 import OwnerHome from "./owner/home.js";
 import StudentLogin from "./user/user_components/login.js"; // Import StudentLogin
 import StudentDashboard from "./user/user_components/dashboard.js";
+import AdminLogin from "./admin/admin_componets/login.js";
+import AdminDashboard from "./admin/admin_componets/dashboar.js";
+import ProtectedRoute from "./admin/admin_componets/ProtectedRoute.js";
 
 function Header() {
   return (
@@ -70,7 +73,23 @@ function App() {
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/admin" element={<HomeForAdmin />} />
-            <Route path="/admin/hostel" element={<Register />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/hostel" 
+              element={
+                <ProtectedRoute>
+                  <Register />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/owner/login" element={<OwnerLogin />} />
             <Route path="/owner/home" element={<OwnerHome />} />
             <Route path="/user/login" element={<StudentLogin />} />
