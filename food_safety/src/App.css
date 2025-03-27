@@ -353,6 +353,7 @@ button:disabled {
   height: var(--header-height);
   background-color: var(--card-bg);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #001;
   z-index: 1000;
   display: flex;
   align-items: center;
